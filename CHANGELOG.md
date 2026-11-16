@@ -1,5 +1,8 @@
 # Notify → Telegram
 
+## 1.2
+- Fixed the app picker showing only the preselected apps on Android 11 and newer. Every installed app with a launcher icon is listed again, so apps such as Microsoft Teams can be ticked.
+
 ## 1.1
 - Security: the Telegram bot token is now encrypted with an AES-256-GCM key held in the Android Keystore, and Android backup is disabled. A token saved by 1.0 is migrated automatically and the plaintext copy is removed.
 - Added a Support section in the app with Buy Me a Coffee and PayPal links.
