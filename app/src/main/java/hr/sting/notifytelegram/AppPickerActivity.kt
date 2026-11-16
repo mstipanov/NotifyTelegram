@@ -31,6 +31,8 @@ class AppPickerActivity : Activity() {
         val packageName: String,
         val label: String,
         val icon: Drawable?,
+        /** Listed because the listener saw a notification, not via PackageManager. */
+        val seenOnly: Boolean = false,
     )
 
     private val all = ArrayList<Entry>()
@@ -129,6 +131,29 @@ class AppPickerActivity : Activity() {
                 )
             }
 
+            // PackageManager cannot enumerate apps in a work profile, but their
+            // notifications still reach the listener. Offer every package the
+            // listener has seen so those apps can be ticked instead of typed.
+            val seen = Prefs.seenPackages(this).toMutableSet()
+            runCatching {
+                NotifyNotificationListener.instance?.activeNotifications?.forEach {
+                    seen.add(it.packageName)
+                }
+            }
+            seen.filter { pkg -> pkg != packageName && found.none { it.packageName == pkg } }
+                .forEach { pkg ->
+                    Prefs.recordSeenPackage(this, pkg)
+                    val info = runCatching { pm.getApplicationInfo(pkg, 0) }.getOrNull()
+                    found.add(
+                        Entry(
+                            packageName = pkg,
+                            label = info?.loadLabel(pm)?.toString() ?: pkg,
+                            icon = info?.let { runCatching { it.loadIcon(pm) }.getOrNull() },
+                            seenOnly = true,
+                        )
+                    )
+                }
+
             found.sortBy { it.label.lowercase(Locale.getDefault()) }
 
             runOnUiThread {
@@ -179,7 +204,7 @@ class AppPickerActivity : Activity() {
         }
         AlertDialog.Builder(this)
             .setTitle("Add package by name")
-            .setMessage("Use this for an app that has no launcher icon.")
+            .setMessage("Use this for an app with no launcher icon that has not posted a notification yet.")
             .setView(input)
             .setPositiveButton("Add") { _, _ ->
                 val pkg = input.text.toString().trim()
@@ -227,7 +252,11 @@ class AppPickerActivity : Activity() {
                 entry.icon ?: getDrawable(R.drawable.ic_launcher)
             )
             view.findViewById<TextView>(R.id.appLabel).text = entry.label
-            view.findViewById<TextView>(R.id.appPackage).text = entry.packageName
+            view.findViewById<TextView>(R.id.appPackage).text = if (entry.seenOnly) {
+                "${entry.packageName} · seen in notifications"
+            } else {
+                entry.packageName
+            }
             view.findViewById<CheckBox>(R.id.appCheck).isChecked = entry.packageName in selected
             return view
         }

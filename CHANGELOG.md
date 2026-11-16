@@ -1,5 +1,8 @@
 # Notify → Telegram
 
+## 1.3
+- *Choose apps* now also lists apps the notification listener has seen, so work-profile apps such as Microsoft Teams can be ticked directly instead of typing their package name.
+
 ## 1.2
 - Fixed the app picker showing only the preselected apps on Android 11 and newer. Every installed app with a launcher icon is listed again, so apps such as Microsoft Teams can be ticked.
 

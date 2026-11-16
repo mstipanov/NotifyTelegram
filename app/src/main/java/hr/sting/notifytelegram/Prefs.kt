@@ -17,8 +17,11 @@ object Prefs {
     private const val KEY_TOKEN_ENCRYPTED = "bot_token_enc"
     private const val KEY_CHAT_ID = "chat_id"
     private const val KEY_PACKAGES = "packages"
+    private const val KEY_SEEN_PACKAGES = "seen_packages"
     private const val KEY_ENABLED = "forwarding_enabled"
     private const val KEY_INCLUDE_JSON = "include_json"
+
+    private val seenLock = Any()
 
     /** Used until the user picks apps; Slack and Outlook are the common case. */
     val DEFAULT_PACKAGES: Set<String> = setOf(
@@ -100,4 +103,22 @@ object Prefs {
 
     fun setPackages(ctx: Context, value: Set<String>) =
         sp(ctx).edit().putStringSet(KEY_PACKAGES, value.toSet()).apply()
+
+    /**
+     * Package names that posted a notification, recorded so the picker can
+     * offer apps that PackageManager cannot enumerate — notably apps in a work
+     * profile. Only the package name is kept, never any notification content.
+     */
+    fun seenPackages(ctx: Context): Set<String> =
+        sp(ctx).getStringSet(KEY_SEEN_PACKAGES, emptySet()).orEmpty().toSet()
+
+    fun recordSeenPackage(ctx: Context, packageName: String) {
+        if (packageName.isEmpty()) return
+        synchronized(seenLock) {
+            val prefs = sp(ctx)
+            val seen = prefs.getStringSet(KEY_SEEN_PACKAGES, emptySet()).orEmpty()
+            if (packageName in seen) return
+            prefs.edit().putStringSet(KEY_SEEN_PACKAGES, seen + packageName).apply()
+        }
+    }
 }

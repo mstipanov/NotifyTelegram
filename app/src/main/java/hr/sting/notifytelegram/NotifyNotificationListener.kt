@@ -40,7 +40,12 @@ class NotifyNotificationListener : NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         val posted = sbn ?: return
-        executor.execute { NotificationForwarder.maybeForward(this, posted) }
+        executor.execute {
+            // Remember the package so the picker can offer apps that
+            // PackageManager cannot see, such as work-profile apps.
+            Prefs.recordSeenPackage(this, posted.packageName)
+            NotificationForwarder.maybeForward(this, posted)
+        }
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {

@@ -40,7 +40,9 @@ Your chat or group: readable line + optional JSON block
    test message. A group chat id can also be pasted by hand.
 5. **Choose apps**: tap *Choose apps*, tick the apps whose notifications should
    be forwarded (Outlook and Slack are preselected on first run), and go back.
-   *Add package by name* covers apps without a launcher icon.
+   Apps that have posted a notification are listed even when they live in a
+   work profile, so they can simply be ticked. *Add package by name* covers
+   anything the picker has not seen yet.
 6. Recommended: **Disable battery optimization** so background sends are not
    deferred by Doze. No other permission is needed.
 

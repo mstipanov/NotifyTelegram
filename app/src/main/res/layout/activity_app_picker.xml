@@ -34,7 +34,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="2dp"
         android:layout_marginEnd="16dp"
-        android:text="Checked apps are forwarded. Apps without a launcher icon can be added by package name."
+        android:text="Checked apps are forwarded. Apps that posted a notification appear automatically; anything else can be added by package name."
         android:textSize="12sp" />
 
     <ListView
